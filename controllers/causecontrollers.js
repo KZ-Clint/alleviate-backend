@@ -43,7 +43,7 @@ class APIfeatures {
 
 const createCause = async (req, res) => {
     const { _id, firstName, lastName, role, cause_started, max } = req.user
-     const { cause_title, target_amount, deadline, category, cover_photo, story, solution, social_link, web_link, bank, acc_number } = req.body
+     const { cause_title, target_amount, deadline, category, cover_photo, story, bank, acc_number } = req.body
      let aduser;
     try{   
         if( role === "giver" ) {
@@ -56,7 +56,7 @@ const createCause = async (req, res) => {
         if(causeCheck) { return res.status(400).json({error : "The cause title is already taken!!"})    }
 
         const cause = await Cause.create({ founderName: `${firstName} ${lastName}`, founderObject_id:_id, founderString_id:_id, cause_title:cause_title.trim(),target_amount, deadline: new Date(deadline).toISOString() ,
-        category, cover_photo, story, solution, links:[ social_link, web_link], bank, acc_number }) 
+        category, cover_photo, story, bank, acc_number }) 
 
         if( role === "advocate" ) {
             aduser = await Advocate.findByIdAndUpdate(_id,  { $push: { cause_started: cause._id } }, {new:true} )   
@@ -240,7 +240,34 @@ const updateCharityRating = async(req, res) => {
       }
  }
 
+ const stripeDonateToCause = async (req, res) => {
+  
+    const { cause_id, amountDonated, user_id} = req.params
+
+  try{ 
+
+    const oldCause = await Cause.findById(cause_id)
+    if( !oldCause ) {
+        return res.status(400).json({error : "Cause not Valid!!"})   
+    } 
+    const user = await Giver.findByIdAndUpdate(user_id, {  
+        $push: { donations_made: { object_id:user_id, string_id:user_id, amount:(amountDonated/100), cause:oldCause.title } }
+     },{new:true} )
+
+     const newcause = await Cause.findByIdAndUpdate(cause_id, { 
+        amount_received: parseInt(oldCause.amount_received) + parseInt(amountDonated/100),
+         $push : { donations_received: {  donor_id: user._id, donor_name: `${user.firstName} ${user.lastName}`, amount:(amountDonated/100), status:"success" } }
+      }, {new:true} )
+
+
+     res.status(200).json({ newcause , user})
+    } catch (err) {
+        console.log({error: err.message})
+        res.status(500).json({ error : err.message })
+    }
+} 
+
 
 
 module.exports = { createCause, getSpecialCause, getSpecificCause, getCategoryCause, getAdvocateCreatedCause, updateFollowingAndFollower, pullFollowingAndFollower, getCauseFollowing,
-                  donateToCause, updateCharityRating, getAdvocateCreatedCause2 }
+                  donateToCause, updateCharityRating, getAdvocateCreatedCause2, stripeDonateToCause }

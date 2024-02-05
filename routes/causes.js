@@ -1,12 +1,15 @@
 const express = require('express')
 const { createCause, getSpecialCause, getSpecificCause, getCategoryCause, getAdvocateCreatedCause, updateFollowingAndFollower, pullFollowingAndFollower, getCauseFollowing,
-     donateToCause, updateCharityRating, getAdvocateCreatedCause2} = require('../controllers/causecontrollers')
+     donateToCause, updateCharityRating, getAdvocateCreatedCause2, stripeDonateToCause} = require('../controllers/causecontrollers')
 
 const router = express.Router()
 
 
 //GET SPECIAL CAUSE
 router.get( '/special', getSpecialCause )
+
+//DONATE TO CAUSE
+router.put( '/stripe/donate/cause/:cause_id/:amountDonated/:user_id', stripeDonateToCause )
 
 // REQUIRE AUTH FOR ALL CAUSE ROUTES
 const requireAuth = require('../middleware/requireAuth')
@@ -42,6 +45,8 @@ router.put( '/donate/cause/:id/:userId', donateToCause )
 
 //RATE CHARITY
 router.put( '/rate/:id/:userId', updateCharityRating)
+
+
 
 
 module.exports = router

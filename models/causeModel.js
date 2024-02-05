@@ -69,10 +69,6 @@ const causeSchema = mongoose.Schema( {
         type: String,
         required: true
     },
-    solution: {
-        type: String,
-        required: true
-    },
     isSuspended: {
         type: Boolean,
         default: false
@@ -80,10 +76,6 @@ const causeSchema = mongoose.Schema( {
     isFinished: {
         type: Boolean,
         default: false
-    },
-    links: {
-        type: Array,
-        default:[]
     },
     isSpecial: {
         type: Boolean,

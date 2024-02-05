@@ -37,7 +37,7 @@ app.get( "/api/coin/:coin", async (req,res) => {
 } )
 
 app.post('/create-checkout-session', async (req, res) => {
-   const { amount, firstName, lastName, email} = req.body
+   const { amount, firstName, lastName,user_id, email, cause_id} = req.body
     try {  
     const session = await stripe.checkout.sessions.create({
       line_items: [
@@ -53,7 +53,7 @@ app.post('/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL}/success`,
+      success_url: `${process.env.FRONTEND_URL}/success/${cause_id}/${amount}/${user_id}`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       customer_email: email
     });
